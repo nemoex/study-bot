@@ -1,2 +1,2 @@
 ru/urfu/studyassistant/core/model/Lesson.class
-ru/urfu/studyassistant/core/model/ScheduleProvider.class
+ru/urfu/studyassistant/core/schedule/ScheduleProvider.class

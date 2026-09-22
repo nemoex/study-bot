@@ -1,4 +1,4 @@
-package ru.urfu.studyassistant.core.model;
+package ru.urfu.studyassistant.core.schedule;
 
 import ru.urfu.studyassistant.core.model.Lesson;
 
