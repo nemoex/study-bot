@@ -37,7 +37,7 @@ public class InMemoryScheduleProvider implements ScheduleProvider {
             new Lesson("Дискретная математика", "Расин О.В", "Т-333", LocalTime.of(14, 15), LocalTime.of(15, 45))
         ));
 
-        data.put(DayOfWeek.MONDAY, List.of(
+        data.put(DayOfWeek.FRIDAY, List.of(
             new Lesson("Алгоритмы", "Кирилл Решке", "Р-052", LocalTime.of(8, 30), LocalTime.of(10, 0))
         ));
 
