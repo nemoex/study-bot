@@ -15,7 +15,8 @@ import java.util.List;
 public class InMemoryScheduleProvider implements ScheduleProvider {
     private final Map<DayOfWeek, List<Lesson>> lessons;
     public InMemoryScheduleProvider(Map<DayOfWeek, List<Lesson>> lessons) {
-        this.lessons = new EnumMap<>(lessons);
+        this.lessons = new EnumMap<>(DayOfWeek.class);
+        this.lessons.putAll(lessons);
     }
 
     // занятия на день
