@@ -26,7 +26,7 @@ public class ScheduleService {
         LocalDateTime lessonStart = lesson.date().atTime(lesson.startTime());
         
         if (lessonStart.isBefore(now)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Ошибка: нельзя добавлять в прошлое.");
         }
         // проверка: конфликт расписания (пересечение)
         List<Lesson> dayLessons = repo.findByDate(userId, lesson.date());
