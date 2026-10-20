@@ -1,62 +1,75 @@
 package ru.urfu.studyassistant.core.dialog;
 
 import org.junit.jupiter.api.Test;
-import ru.urfu.studyassistant.core.schedule.ScheduleService;
+import ru.urfu.studyassistant.core.model.UserId;
+import ru.urfu.studyassistant.core.port.Message;
 
-import java.time.DayOfWeek;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 class BotEngineTest {
 
-    private final ScheduleService scheduleService = mock(ScheduleService.class);
-    private final BotEngine engine = new BotEngine(scheduleService);
+    private final UserId user = new UserId("test-user");
 
-    @Test
-    void help_returnsHelpText() {
-        String response = engine.handle("/help");
-        assertThat(response)
-                .contains("/today")
-                .contains("/week")
-                .contains("/help");
+    private Command fakeCommand(String trigger, String response) {
+        return new Command() {
+            @Override public boolean matches(String text) { return text.trim().equals(trigger); }
+            @Override public String execute(UserId userId, String text) { return response; }
+        };
     }
 
     @Test
-    void today_asksServiceForToday() {
-        when(scheduleService.formatDay(any(DayOfWeek.class))).thenReturn("Пары на сегодня");
-        String response = engine.handle("/today");
-        assertThat(response).isEqualTo("Пары на сегодня");
-        verify(scheduleService).formatDay(any(DayOfWeek.class));
+    void routesToMatchingCommand() {
+        BotEngine engine = new BotEngine(List.of(fakeCommand("/ping", "pong")));
+
+        String reply = engine.onMessage(new Message(user, "/ping"));
+
+        assertThat(reply).isEqualTo("pong");
     }
 
     @Test
-    void week_asksServiceForWeek() {
-        when(scheduleService.formatWeek()).thenReturn("Пары на неделю");
-        String response = engine.handle("/week");
-        assertThat(response).isEqualTo("Пары на неделю");
+    void routesToFirstMatchingCommandOnly() {
+        BotEngine engine = new BotEngine(List.of(
+                fakeCommand("/ping", "first"),
+                fakeCommand("/ping", "second")
+        ));
+
+        String reply = engine.onMessage(new Message(user, "/ping"));
+
+        assertThat(reply).isEqualTo("first");
     }
 
     @Test
-    void dayName_asksServiceForThatDay() {
-        when(scheduleService.formatDay(DayOfWeek.MONDAY)).thenReturn("Понедельник");
-        String response = engine.handle("понедельник");
-        assertThat(response).isEqualTo("Понедельник");
-        verify(scheduleService).formatDay(DayOfWeek.MONDAY);
+    void returnsFallbackWhenNothingMatches() {
+        BotEngine engine = new BotEngine(List.of(fakeCommand("/ping", "pong")));
+
+        String reply = engine.onMessage(new Message(user, "привет"));
+
+        assertThat(reply).contains("/help");
     }
 
     @Test
-    void unknownCommand_returnsErrorMessage() {
-        String response = engine.handle("/foo");
-        assertThat(response).contains("Не знаю");
+    void worksWithRealHelpCommand() {
+        BotEngine engine = new BotEngine(List.of(new HelpCommand()));
+
+        String reply = engine.onMessage(new Message(user, "/help"));
+
+        assertThat(reply).contains("/today", "/week", "/add", "/exit");
     }
 
     @Test
-    void emptyInput_returnsErrorMessage() {
-        String response = engine.handle("");
-        assertThat(response).isNotEmpty();
+    void passesUserIdToCommand() {
+        Command spy = new Command() {
+            @Override public boolean matches(String text) { return true; }
+            @Override public String execute(UserId userId, String text) {
+                return "user=" + userId.value();
+            }
+        };
+        BotEngine engine = new BotEngine(List.of(spy));
+
+        String reply = engine.onMessage(new Message(user, "anything"));
+
+        assertThat(reply).isEqualTo("user=test-user");
     }
 }
