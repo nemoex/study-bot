@@ -32,7 +32,7 @@ public class ConsoleChatPlatform implements ChatPlatform {
     }
 
     @Override
-    public void send(String text) {
+    public void send(UserId to, String text) {
         out.println(text);
     }
 
@@ -41,10 +41,10 @@ public class ConsoleChatPlatform implements ChatPlatform {
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if (line.trim().equals("/exit")) {
-                send("До встречи!");
+                send(currentUserId, "До встречи!");
                 return;
             }
-            send(handler.onMessage(new Message(currentUserId, line)));
+            send(currentUserId, handler.onMessage(new Message(currentUserId, line)));
         }
     }
 }
