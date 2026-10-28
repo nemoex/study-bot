@@ -28,3 +28,12 @@ target/
 
 # IDE — VS Code
 .vscode/
+
+# Secrets / local env
+.env
+.env.*
+*.env
+
+# IntelliJ IDEA
+.idea/
+*.iml
