@@ -43,7 +43,7 @@ class ConsoleChatPlatformTest {
     @Test
     void sendWritesTextToOutputStream() {
         TestPlatform p = make("");
-        p.platform().send("hello");
+        p.platform().send(user, "hello");
         assertThat(p.output()).contains("hello");
     }
 
