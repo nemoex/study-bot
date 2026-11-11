@@ -10,9 +10,10 @@ import ru.urfu.studyassistant.core.dialog.WeekCommand;
 import ru.urfu.studyassistant.core.port.MessageHandler;
 import ru.urfu.studyassistant.core.schedule.ScheduleRepository;
 import ru.urfu.studyassistant.core.schedule.ScheduleService;
-import ru.urfu.studyassistant.infrastructure.persistence.InMemoryScheduleRepository;
 import ru.urfu.studyassistant.infrastructure.vk.VkChatPlatform;
 import ru.urfu.studyassistant.infrastructure.vk.VkConfig;
+import ru.urfu.studyassistant.infrastructure.persistence.Database;
+import ru.urfu.studyassistant.infrastructure.persistence.JdbcScheduleRepository;
 
 import java.time.Clock;
 import java.util.List;
@@ -33,8 +34,19 @@ public class MainVk {
         }
         VkConfig config = VkConfig.fromValues(groupId, accessToken);
 
+        String dbUrl = System.getenv("DB_URL");
+        String dbUser = System.getenv("DB_USER");
+        String dbPassword = System.getenv("DB_PASSWORD");
 
-        ScheduleRepository repository = new InMemoryScheduleRepository();
+        if (dbUrl == null || dbUrl.isBlank()) {
+            System.err.println("Ошибка: задайте переменную окружения DB_URL");
+            System.exit(1);
+        }
+
+        Database database = new Database(dbUrl, dbUser, dbPassword);
+        database.initSchema();
+        ScheduleRepository repository = new JdbcScheduleRepository(database.getDataSource());
+        
         Clock clock = Clock.systemDefaultZone();
         ScheduleService scheduleService = new ScheduleService(repository, clock);
         LessonParser lessonParser = new LessonParser();
