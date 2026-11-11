@@ -7,6 +7,7 @@ import ru.urfu.studyassistant.core.model.UserId;
 import ru.urfu.studyassistant.core.port.ChatPlatform;
 import ru.urfu.studyassistant.core.port.Message;
 import ru.urfu.studyassistant.core.port.MessageHandler;
+import ru.urfu.studyassistant.infrastructure.logging.BotLogger;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -21,11 +22,13 @@ public class VkChatPlatform implements ChatPlatform {
     private final String accessToken;
     private final HttpClient httpClient;
     private final Gson gson;
+    private final BotLogger logger;
     private MessageHandler handler;
 
-    public VkChatPlatform(String groupId, String accessToken) {
+    public VkChatPlatform(String groupId, String accessToken, BotLogger logger) {
         this.groupId = groupId;
         this.accessToken = accessToken;
+        this.logger = logger;
         this.gson = new Gson();
         
         // HTTP-клиент
@@ -59,21 +62,20 @@ public class VkChatPlatform implements ChatPlatform {
 
             httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
-            System.err.println("[VK] Ошибка при отправке сообщения:");
-            e.printStackTrace();
+            logger.error("Ошибка при отправке сообщения пользователю " + to.value(), e);
         }
     }
 
     @Override
     public void run() {
-        System.out.println("[VK] Запуск Long Poll...");
+        logger.info("VK: Запуск Long Poll...");
         try {
             var lpData = getLongPollServer();
             var server = lpData.get("server").getAsString();
             var key = lpData.get("key").getAsString();
             var ts = lpData.get("ts").getAsString();
 
-            System.out.println("[VK] Успешно. Подключились к ВКонтакте. Ждем сообщения...");
+            logger.info("VK: Успешно подключились. Ждем сообщения...");
 
             while (true) {
                 var url = String.format("%s?act=a_check&key=%s&ts=%s&wait=25", server, key, ts);
@@ -88,7 +90,7 @@ public class VkChatPlatform implements ChatPlatform {
                 var json = gson.fromJson(response.body(), JsonObject.class);
 
                 if (json.has("failed")) {
-                    System.out.println("[VK] токен устаревший, переподключаемся...");
+                    logger.info("VK: токен устаревший, переподключаемся...");
                     lpData = getLongPollServer();
                     server = lpData.get("server").getAsString();
                     key = lpData.get("key").getAsString();
@@ -108,15 +110,17 @@ public class VkChatPlatform implements ChatPlatform {
                         var text = messageObj.get("text").getAsString();
 
                         var domainUserId = new UserId("vk-" + vkUserId);
+                        logger.logIncoming(domainUserId, text);
+
                         var answer = handler.onMessage(new Message(domainUserId, text));
+                        logger.logOutgoing(domainUserId, answer);
 
                         send(domainUserId, answer);
                     }
                 }
             }
         } catch (Exception e) {
-            System.err.println("[VK] Ошибка в работе платформы:");
-            e.printStackTrace();
+            logger.error("Критическая ошибка в работе VkChatPlatform", e);
         }
     }
 
