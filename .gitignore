@@ -33,6 +33,7 @@ target/
 .env
 .env.*
 *.env
+!.env.example
 
 # IntelliJ IDEA
 .idea/
