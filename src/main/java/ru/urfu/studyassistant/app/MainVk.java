@@ -13,7 +13,6 @@ import ru.urfu.studyassistant.core.schedule.ScheduleService;
 import ru.urfu.studyassistant.infrastructure.vk.VkChatPlatform;
 import ru.urfu.studyassistant.infrastructure.vk.VkConfig;
 import ru.urfu.studyassistant.infrastructure.persistence.Database;
-import ru.urfu.studyassistant.infrastructure.persistence.InMemoryScheduleRepository;
 import ru.urfu.studyassistant.infrastructure.persistence.JdbcScheduleRepository;
 
 import java.time.Clock;
