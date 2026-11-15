@@ -44,15 +44,16 @@ public class MainVk {
             System.exit(1);
         }
 
+        BotLogger logger = new ConsoleBotLogger();
+
         Database database = new Database(dbUrl, dbUser, dbPassword);
         database.initSchema();
+        logger.info("БД инициализирована");
         ScheduleRepository repository = new JdbcScheduleRepository(database.getDataSource());
         
         Clock clock = Clock.systemDefaultZone();
         ScheduleService scheduleService = new ScheduleService(repository, clock);
         LessonParser lessonParser = new LessonParser();
-
-        BotLogger logger = new ConsoleBotLogger();
 
         List<Command> commands = List.of(
                 new HelpCommand(),
