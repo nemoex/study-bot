@@ -12,6 +12,7 @@ import ru.urfu.studyassistant.core.schedule.ScheduleService;
 import ru.urfu.studyassistant.infrastructure.vk.VkChatPlatform;
 import ru.urfu.studyassistant.infrastructure.vk.VkConfig;
 import ru.urfu.studyassistant.infrastructure.logging.BotLogger;
+import ru.urfu.studyassistant.infrastructure.logging.ConsoleBotLogger;
 import ru.urfu.studyassistant.infrastructure.persistence.Database;
 import ru.urfu.studyassistant.infrastructure.persistence.JdbcScheduleRepository;
 
@@ -51,7 +52,7 @@ public class MainVk {
         ScheduleService scheduleService = new ScheduleService(repository, clock);
         LessonParser lessonParser = new LessonParser();
 
-        BotLogger logger = new BotLogger();
+        BotLogger logger = new ConsoleBotLogger();
 
         List<Command> commands = List.of(
                 new HelpCommand(),
