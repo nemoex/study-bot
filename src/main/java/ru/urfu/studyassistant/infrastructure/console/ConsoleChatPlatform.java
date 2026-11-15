@@ -38,6 +38,7 @@ public class ConsoleChatPlatform implements ChatPlatform {
 
     @Override
     public void run() {
+        send(currentUserId, "Бот запущен. Введите /add для добавления пары или /help.");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if (line.trim().equals("/exit")) {

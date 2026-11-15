@@ -1,75 +1,22 @@
 package ru.urfu.studyassistant.app;
 
-import ru.urfu.studyassistant.core.dialog.AddLessonCommand;
-import ru.urfu.studyassistant.core.dialog.BotEngine;
-import ru.urfu.studyassistant.core.dialog.Command;
-import ru.urfu.studyassistant.core.dialog.HelpCommand;
-import ru.urfu.studyassistant.core.dialog.LessonParser;
-import ru.urfu.studyassistant.core.dialog.TodayCommand;
-import ru.urfu.studyassistant.core.dialog.WeekCommand;
-import ru.urfu.studyassistant.core.schedule.ScheduleRepository;
-import ru.urfu.studyassistant.core.schedule.ScheduleService;
+import com.google.inject.Guice;
 import ru.urfu.studyassistant.infrastructure.vk.VkChatPlatform;
-import ru.urfu.studyassistant.infrastructure.vk.VkConfig;
-import ru.urfu.studyassistant.infrastructure.logging.BotLogger;
-import ru.urfu.studyassistant.infrastructure.logging.ConsoleBotLogger;
-import ru.urfu.studyassistant.infrastructure.persistence.Database;
-import ru.urfu.studyassistant.infrastructure.persistence.JdbcScheduleRepository;
 
-import java.time.Clock;
-import java.util.List;
-
-public class MainVk {
+public final class MainVk {
 
     public static void main(String[] args) {
-        String groupId = System.getenv("VK_GROUP_ID");
-        String accessToken = System.getenv("VK_BOT_TOKEN");
-
-        if (groupId == null || groupId.isBlank()) {
-            System.err.println("Ошибка: задайте переменную окружения VK_GROUP_ID");
+        AppConfig config;
+        try {
+            config = AppConfig.fromEnv();
+        } catch (IllegalStateException e) {
+            System.err.println(e.getMessage());
             System.exit(1);
-        }
-        if (accessToken == null || accessToken.isBlank()) {
-            System.err.println("Ошибка: задайте переменную окружения VK_BOT_TOKEN");
-            System.exit(1);
-        }
-        VkConfig config = VkConfig.fromValues(groupId, accessToken);
-
-        String dbUrl = System.getenv("DB_URL");
-        String dbUser = System.getenv("DB_USER");
-        String dbPassword = System.getenv("DB_PASSWORD");
-
-        if (dbUrl == null || dbUrl.isBlank()) {
-            System.err.println("Ошибка: задайте переменную окружения DB_URL");
-            System.exit(1);
+            return;
         }
 
-        BotLogger logger = new ConsoleBotLogger();
-
-        Database database = new Database(dbUrl, dbUser, dbPassword);
-        database.initSchema();
-        logger.info("БД инициализирована");
-        ScheduleRepository repository = new JdbcScheduleRepository(database.getDataSource());
-        
-        Clock clock = Clock.systemDefaultZone();
-        ScheduleService scheduleService = new ScheduleService(repository, clock);
-        LessonParser lessonParser = new LessonParser();
-
-        List<Command> commands = List.of(
-                new HelpCommand(),
-                new TodayCommand(scheduleService, clock),
-                new WeekCommand(scheduleService, clock),
-                new AddLessonCommand(scheduleService, lessonParser)
-        );
-
-
-        BotEngine engine = new BotEngine(commands);
-
-        VkChatPlatform platform = new VkChatPlatform(config.groupId(), config.accessToken(), logger);
-
-        platform.setHandler(engine);
-
-        logger.info("VK-бот запущен для группы " + config.groupId());
-        platform.run();
+        Guice.createInjector(new VkModule(config))
+                .getInstance(VkChatPlatform.class)
+                .run();
     }
 }
