@@ -42,7 +42,7 @@ public class Database {
                     stmt.execute(statement);
                 }
             }
-            System.out.println("БД успешно инициализирована.");
+            
         } catch (Exception e) {
             throw new RuntimeException("Ошибка инициализации БД", e);
         }

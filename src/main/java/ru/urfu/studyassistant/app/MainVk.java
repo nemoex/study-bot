@@ -7,11 +7,12 @@ import ru.urfu.studyassistant.core.dialog.HelpCommand;
 import ru.urfu.studyassistant.core.dialog.LessonParser;
 import ru.urfu.studyassistant.core.dialog.TodayCommand;
 import ru.urfu.studyassistant.core.dialog.WeekCommand;
-import ru.urfu.studyassistant.core.port.MessageHandler;
 import ru.urfu.studyassistant.core.schedule.ScheduleRepository;
 import ru.urfu.studyassistant.core.schedule.ScheduleService;
 import ru.urfu.studyassistant.infrastructure.vk.VkChatPlatform;
 import ru.urfu.studyassistant.infrastructure.vk.VkConfig;
+import ru.urfu.studyassistant.infrastructure.logging.BotLogger;
+import ru.urfu.studyassistant.infrastructure.logging.ConsoleBotLogger;
 import ru.urfu.studyassistant.infrastructure.persistence.Database;
 import ru.urfu.studyassistant.infrastructure.persistence.JdbcScheduleRepository;
 
@@ -43,14 +44,16 @@ public class MainVk {
             System.exit(1);
         }
 
+        BotLogger logger = new ConsoleBotLogger();
+
         Database database = new Database(dbUrl, dbUser, dbPassword);
         database.initSchema();
+        logger.info("БД инициализирована");
         ScheduleRepository repository = new JdbcScheduleRepository(database.getDataSource());
         
         Clock clock = Clock.systemDefaultZone();
         ScheduleService scheduleService = new ScheduleService(repository, clock);
         LessonParser lessonParser = new LessonParser();
-
 
         List<Command> commands = List.of(
                 new HelpCommand(),
@@ -61,13 +64,12 @@ public class MainVk {
 
 
         BotEngine engine = new BotEngine(commands);
-        MessageHandler handler = new LoggingMessageHandler(engine);
 
+        VkChatPlatform platform = new VkChatPlatform(config.groupId(), config.accessToken(), logger);
 
-        VkChatPlatform platform = new VkChatPlatform(config.groupId(), config.accessToken());
-        platform.setHandler(handler);
+        platform.setHandler(engine);
 
-        System.out.println("VK-бот запущен для группы " + config.groupId());
+        logger.info("VK-бот запущен для группы " + config.groupId());
         platform.run();
     }
 }
