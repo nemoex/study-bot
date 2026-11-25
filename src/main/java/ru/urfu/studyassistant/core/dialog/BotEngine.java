@@ -20,6 +20,6 @@ public class BotEngine implements MessageHandler {
                 return command.execute(message.userId(), message.text());
             }
         }
-        return "Не понял команду. Напишите /help, чтобы увидеть список команд.";
+        return "🤔 Не понял команду. Напишите /help, чтобы увидеть список команд.";
     }
 }

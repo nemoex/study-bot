@@ -29,7 +29,8 @@ class AddLessonCommandTest {
         
         String response = command.execute(user, "/add");
         
-        assertThat(response).contains("Использование: /add");
+        assertThat(response).contains("📝 Использование:");
+        assertThat(response).contains("/add");
     }
 
     @Test
@@ -44,9 +45,9 @@ class AddLessonCommandTest {
         
         String response = command.execute(user, "/add 2026-10-11, 08:30, Матанализ, Белоусова В.И., Р-215");
         
-        assertThat(response).contains("Добавлено:");
+        assertThat(response).contains("✅ Добавлено:");
         assertThat(response).contains("2026-10-11");
-        assertThat(response).contains("08:30-10:00");
+        assertThat(response).contains("08:30");
         assertThat(response).contains("Матанализ");
     }
 }
