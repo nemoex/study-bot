@@ -31,6 +31,6 @@ class LessonParserTest {
         LessonParser parser = new LessonParser();
         assertThatThrownBy(() -> parser.parse("test"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Неверный формат. Использование: /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория>");
+                .hasMessageContaining("❌ Неверный формат.");
     }
 }

@@ -16,7 +16,7 @@ public class LessonParser {
         String[] parts = input.split(",");
         
         if (parts.length != 5) {
-            throw new IllegalArgumentException("Неверный формат. Использование: /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория>");
+            throw new IllegalArgumentException("❌ Неверный формат.");
         }
 
         try {
@@ -28,7 +28,7 @@ public class LessonParser {
 
             return new Lesson(date, time, subject, teacher, room);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Неверный формат даты или времени. Используйте YYYY-MM-DD и HH:mm.");
+            throw new IllegalArgumentException("❌ Неверный формат даты или времени. Используйте YYYY-MM-DD и HH:mm.");
         }
     }
 }

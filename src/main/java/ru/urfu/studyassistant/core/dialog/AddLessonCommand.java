@@ -25,14 +25,17 @@ public class AddLessonCommand implements Command {
         String args = trimmedText.length() > 4 ? trimmedText.substring(4).trim() : "";
 
         if (args.isEmpty()) {
-            return "Использование: /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория>";
+            return """
+                    📝 Использование: 
+                    /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория>
+                    Пример: /add 2026-11-25, 10:15, Математика, Иванов, Р-101""";
         }
         try {
             Lesson lesson = parser.parse(args);
             
             service.addLesson(userId, lesson);
             
-            return String.format("Добавлено: %s %s-%s, %s, %s, ауд. %s.",
+            return String.format("✅ Добавлено: %s, %s-%s\n %s | %s | ауд. %s",
                     lesson.date(),
                     lesson.startTime(),
                     lesson.endTime(),
@@ -41,7 +44,7 @@ public class AddLessonCommand implements Command {
                     lesson.room());
                     
         } catch (IllegalArgumentException e) {
-            return e.getMessage() != null ? e.getMessage() : "Произошла ошибка при добавлении пары";
+            return e.getMessage() != null ? e.getMessage() : "⚠️ Произошла ошибка при добавлении пары";
         }
     }
 }

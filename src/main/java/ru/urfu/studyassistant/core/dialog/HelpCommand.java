@@ -5,13 +5,16 @@ import ru.urfu.studyassistant.core.model.UserId;
 public class HelpCommand implements Command {
 
     private static final String HELP_TEXT = """
-            Привет! Я бот-расписание. Умею:
-              /today       — пары на сегодня
-              /week        — пары на текущую неделю
-              /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория>
-                           — добавить пару
-              /help        — показать это сообщение
-              /exit        — попрощаться
+            👋 Привет! Я твой учебный ассистент.
+            Вот что я умею:
+            
+            📅 /today — пары на сегодня
+            📆 /week — пары на текущую неделю
+            
+            ➕ /add <дата YYYY-MM-DD>, <время HH:mm>, <предмет>, <преподаватель>, <аудитория> — добавить пару
+            
+            ❓ /help — показать это сообщение
+            🚪 /exit — попрощаться
             """;
 
     @Override

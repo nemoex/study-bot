@@ -23,6 +23,6 @@ class TodayCommandTest {
         assertThat(command.matches("/week")).isFalse();
 
         String response = command.execute(new UserId("user1"), "/today");
-        assertThat(response).isEqualTo("На 2026-10-11 пар нет.");
+        assertThat(response).isEqualTo("На 11.10 пар нет.");
     }
 }
