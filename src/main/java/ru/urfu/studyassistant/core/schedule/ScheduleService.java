@@ -29,21 +29,20 @@ public class ScheduleService {
         // проверка: нельзя добавить ранее
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime lessonStart = lesson.date().atTime(lesson.startTime());
-        
+
         if (lessonStart.isBefore(now)) {
             throw new IllegalArgumentException("Ошибка: нельзя добавлять в прошлое.");
         }
         // проверка: конфликт расписания (пересечение)
         List<Lesson> dayLessons = repo.findByDate(userId, lesson.date());
         for (Lesson existing : dayLessons) {
-            boolean overlaps = lesson.startTime().isBefore(existing.endTime()) && 
-                               existing.startTime().isBefore(lesson.endTime());
-            
+            boolean overlaps = lesson.startTime().isBefore(existing.endTime()) &&
+                    existing.startTime().isBefore(lesson.endTime());
+
             if (overlaps) {
                 throw new IllegalArgumentException(String.format(
-                    "⚠️ Конфликт: на это время уже стоит «%s» (%s-%s).",
-                    existing.subject(), existing.startTime(), existing.endTime()
-                ));
+                        "⚠️ Конфликт: на это время уже стоит «%s» (%s-%s).",
+                        existing.subject(), existing.startTime(), existing.endTime()));
             }
         }
         repo.add(userId, lesson);
@@ -63,9 +62,10 @@ public class ScheduleService {
         String dayName = getCapitalizedDayOfWeek(date);
         sb.append(String.format("📅 Твое расписание на %s (%s):\n\n", date.format(DATE_FORMAT), dayName));
 
-        for (Lesson l : sorted) {
-            sb.append(String.format("🕒 %s-%s | %s\n📍 %s, ауд. %s\n\n",
-                    l.startTime(), l.endTime(), l.subject(), l.teacher(), l.room()));
+        for (int i = 0; i < sorted.size(); i++) {
+            Lesson l = sorted.get(i);
+            sb.append(String.format("%d. 🕒 %s-%s | %s | %s, ауд. %s\n\n",
+                    i + 1, l.startTime(), l.endTime(), l.subject(), l.teacher(), l.room()));
         }
         return sb.toString().trim();
     }
@@ -75,26 +75,27 @@ public class ScheduleService {
         LocalDate endOfWeek = anchorDate.with(DayOfWeek.SUNDAY);
 
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("📆 Расписание на неделю (%s - %s):\n\n", 
+        sb.append(String.format("📆 Расписание на неделю (%s - %s):\n\n",
                 startOfWeek.format(DATE_FORMAT), endOfWeek.format(DATE_FORMAT)));
 
         boolean hasLessons = false;
         for (int i = 0; i < 7; i++) {
             LocalDate currentDate = startOfWeek.plusDays(i);
             List<Lesson> daily = repo.findByDate(userId, currentDate);
-            
+
             if (!daily.isEmpty()) {
                 hasLessons = true;
                 String dayName = getCapitalizedDayOfWeek(currentDate);
-                
+
                 sb.append(String.format("%s (%s):\n", currentDate.format(DATE_FORMAT), dayName));
-                
+
                 List<Lesson> sorted = new ArrayList<>(daily);
                 sorted.sort(Comparator.comparing(Lesson::startTime));
-                
-                for (Lesson l : sorted) {
-                    sb.append(String.format("  🕒 %s-%s | %s\n     📍 %s, ауд. %s\n",
-                            l.startTime(), l.endTime(), l.subject(), l.teacher(), l.room()));
+
+                for (int j = 0; j < sorted.size(); j++) {
+                    Lesson l = sorted.get(j);
+                    sb.append(String.format("%d. 🕒 %s-%s | %s | %s, ауд. %s\n\n",
+                            j + 1, l.startTime(), l.endTime(), l.subject(), l.teacher(), l.room()));
                 }
                 sb.append("\n");
             }
